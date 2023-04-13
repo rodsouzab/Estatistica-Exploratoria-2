@@ -17,11 +17,6 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-      radioButtons("dados", "Escolher dados",
-                   c("Dados 1" = "d1",
-                     "Dados 2" = "d2",
-                     "Dados 3" = "d3")
-      ),
       sliderInput("mu0", "Selecione mu0",
                   min = 0, max = 30, value = 15
       ),
@@ -33,8 +28,12 @@ ui <- fluidPage(
       radioButtons("tipo", "Tipo do teste",
                    c("Bilateral" = "bi",
                      "Unilateral a Esquerda" = "esq",
-                     "Unilateral a Direita" = "dir"))
-    ),
+                     "Unilateral a Direita" = "dir")),
+      numericInput("sig2",
+                   "Selecione a Variância",
+                   value = 0)
+      )
+      ,
     
     # Show a plot of the generated distribution
     mainPanel(
@@ -46,7 +45,10 @@ ui <- fluidPage(
                            tableOutput('table'),
                            plotOutput('hist')
                   ),
-                  tabPanel("Intervalo de Confiança", "Nada por enquanto!"),
+                  tabPanel("Intervalo de Confiança", sliderInput(
+                    "Nível de Confiança", "Selecione o Nível de Confiança",
+                    min = 0, max = 1, value = 0.5
+                  )),
                   tabPanel("Regressão", plotOutput('reg'))
       )
       
@@ -112,40 +114,35 @@ server <- function(input, output) {
   
   
   
+  df2 = excel.data %>% separate(Hora, c("dia", "hora"), " ") %>% 
+    separate(hora, c("horas","minutos","segundos"), ":")
   
   
+  df2_new = df2 %>% filter(minutos == 40 & segundos >= 53 | minutos > 40) %>%
+    filter(minutos == 45 & segundos <= 12 | minutos < 45)
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  dados = reactive(input$dados)
-  escolha_dados = renderText(dados())
-  
-  x = reactive({
-    if(escolha_dados() == "d1"){
-      c(2,5,13, 27, 21, 10, 9, 15)
-    }else if(escolha_dados() == "d2"){
-      c(15,2,13, 15, 12, 10, 5, 4)
-    }else{
-      c(1, 2, 13, 27, 7, 16, 5, 20)
-    }
+  sig2 = reactive({
+    as.numeric(input$sig2)
   })
+
+  
+  x = df2_new %>% select(veloc)
   
   
   n = reactive(length(x()))
+  
   xbarra = reactive(mean(x()))
-  sig = reactive(sd(x()))
+  
+  sig = sd(sig2)
+  
   sig_xbar = reactive(sig()/sqrt(n()))
   
   mu0 = reactive({
     as.integer(input$mu0)
   })
+  
+  
   
   
   alfa = reactive(as.numeric(input$alfa))
@@ -193,6 +190,27 @@ server <- function(input, output) {
     abline(v = xbarra(), col= 'blue')
   })
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  #############################################################################
   output$reg = renderPlot({
     #gráfico de regressão com dados 'cars' aqui!
   })
