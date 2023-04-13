@@ -3,7 +3,7 @@ library(OpenStreetMap)
 library(tidyverse)
 library(readxl)
 library(sp)
-
+aaasda
 excel.data = read_xlsx("C:\\Users\\rodri\\OneDrive\\Documentos\\Estatística Exploratória 1\\2 VA\\dados_de_caminhada_corrida.xlsx")
 
 excel.data = excel.data %>% separate(Coordenadas,c("lat","long"),",") %>%
